@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f2f2f2;
+            margin: 0;
+        }
+
+        /* Header Styles */
+        header {
+            background: black;
+            color: white;
+            padding: 15px 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            background: #555;
+        }
+
+        /* Game Styles */
+        main {
+            margin-top: 30px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            justify-content: center;
+            margin: 20px auto;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            font-size: 2em;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .cell:hover {
+            background: #e0e0e0;
+        }
+
+        button {
+            padding: 8px 16px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Tic Tac Toe</h1>
+        <nav>
+            <a href="#" class="active" id="homeLink">Home</a>
+            <a href="#" id="aiLink">Play with AI</a>
+            <a href="#" id="humanLink">Play with Human</a>
+            <a href="#" id="aboutLink">About</a>
+        </nav>
+    </header>
+
+    <main id="content">
+        <!-- Default Home Content -->
+        <div id="homeSection">
+            <h2>Welcome to Tic Tac Toe</h2>
+            <p>Select a mode above to start playing!</p>
+        </div>
+
+        <!-- Game Section  -->
+        <div id="gameSection" style="display:none;">
+            <div class="board" id="board"></div>
+            <p id="status">Current Player: X</p>
+            <button onclick="resetGame()">Restart</button>
+        </div>
+
+        <!-- About Section -->
+        <div id="aboutSection" style="display:none;">
+            <h2>About</h2>
+            <p>This project is created by <b>Tushar Mehta</b>, <b>Maninder Singh</b>, and <b>Sujal Ramani</b> for
+                <b>CWEB 280</b>.</p>
+            <p>It demonstrates the use of modern web technologies such as Node.js and Express.</p>
+        </div>
+    </main>
+
+    <script>
+        // Navigation
+        const homeLink = document.getElementById("homeLink");
+        const aiLink = document.getElementById("aiLink");
+        const humanLink = document.getElementById("humanLink");
+        const aboutLink = document.getElementById("aboutLink");
+
+        const homeSection = document.getElementById("homeSection");
+        const gameSection = document.getElementById("gameSection");
+        const aboutSection = document.getElementById("aboutSection");
+
+        function showSection(section) {
+            homeSection.style.display = section === "home" ? "block" : "none";
+            gameSection.style.display = section === "game" ? "block" : "none";
+            aboutSection.style.display = section === "about" ? "block" : "none";
+
+            document.querySelectorAll("nav a").forEach(a => a.classList.remove("active"));
+            if (section === "home") homeLink.classList.add("active");
+            if (section === "game") humanLink.classList.add("active");
+            if (section === "about") aboutLink.classList.add("active");
+        }
+
+        homeLink.onclick = () => showSection("home");
+        aiLink.onclick = () => alert("AI mode coming soon!");
+        humanLink.onclick = () => showSection("game");
+        aboutLink.onclick = () => showSection("about");
+
+        // Game logic
+        let board = ["", "", "", "", "", "", "", "", ""];
+        let currentPlayer = "X";
+        let gameOver = false;
+
+        const boardDiv = document.getElementById("board");
+        const status = document.getElementById("status");
+
+        function drawBoard() {
+            boardDiv.innerHTML = "";
+            board.forEach((cell, i) => {
+                const div = document.createElement("div");
+                div.classList.add("cell");
+                div.textContent = cell;
+                div.onclick = () => makeMove(i);
+                boardDiv.appendChild(div);
+            });
+        }
+
+        function makeMove(i) {
+            if (board[i] || gameOver) return;
+            board[i] = currentPlayer;
+            if (checkWinner()) {
+                status.textContent = `${currentPlayer} wins!`;
+                gameOver = true;
+            } else if (board.every(c => c)) {
+                status.textContent = "It's a draw!";
+                gameOver = true;
+            } else {
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+                status.textContent = `Current Player: ${currentPlayer}`;
+            }
+            drawBoard();
+        }
+
+        function checkWinner() {
+            const wins = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return wins.some(([a, b, c]) => board[a] && board[a] === board[b] && board[a] === board[c]);
+        }
+
+        function resetGame() {
+            board = ["", "", "", "", "", "", "", "", ""];
+            currentPlayer = "X";
+            gameOver = false;
+            status.textContent = "Current Player: X";
+            drawBoard();
+        }
+
+        drawBoard();
+    </script>
+</body>
+
+</html>

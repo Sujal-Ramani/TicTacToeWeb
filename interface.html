@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tic-Tac-Toe API Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { margin: 5px; padding: 10px; }
+        input { margin: 5px; padding: 5px; }
+        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; }
+        .game { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Tic-Tac-Toe API Interface</h1>
+
+    <div>
+        <button id="checkApi">Check API</button>
+        <button id="getGames">Get All Games</button>
+    </div>
+
+    <h3>Create Game</h3>
+    <input type="text" id="player1" placeholder="Player 1">
+    <input type="text" id="player2" placeholder="Player 2">
+    <button id="createGame">Create Game</button>
+
+    <h3>Update Game</h3>
+    <input type="text" id="updateId" placeholder="Game ID">
+    <input type="text" id="updateField" placeholder='Field (board/status)'>
+    <input type="text" id="updateValue" placeholder='Value (JSON for board)'>
+    <button id="updateGame">Update Game</button>
+
+    <h3>Delete Game</h3>
+    <input type="text" id="deleteId" placeholder="Game ID">
+    <button id="deleteGame">Delete Game</button>
+
+    <h3>Output</h3>
+    <pre id="output"></pre>
+
+    <script>
+        const output = document.getElementById('output');
+        const BASE_URL = 'http://localhost:8080';
+
+        async function handleFetch(url, options = {}) {
+            try {
+                const res = await fetch(url, options);
+                const data = await res.json();
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                output.textContent = 'Error: ' + err;
+            }
+        }
+
+        // Check API
+        document.getElementById('checkApi').addEventListener('click', () => {
+            handleFetch(`${BASE_URL}/`);
+        });
+
+        // Get all games
+        document.getElementById('getGames').addEventListener('click', () => {
+            handleFetch(`${BASE_URL}/games`);
+        });
+
+        // Create new game
+        document.getElementById('createGame').addEventListener('click', () => {
+            const player1 = document.getElementById('player1').value;
+            const player2 = document.getElementById('player2').value;
+            handleFetch(`${BASE_URL}/games`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ player1, player2 })
+            });
+        });
+
+        // Update game
+        document.getElementById('updateGame').addEventListener('click', () => {
+            const id = document.getElementById('updateId').value;
+            const field = document.getElementById('updateField').value;
+            let value = document.getElementById('updateValue').value;
+
+            if (!id || !field) {
+                output.textContent = 'Game ID and field are required.';
+                return;
+            }
+
+            // Parse JSON if updating board
+            if (field === 'board') {
+                try { value = JSON.parse(value); } 
+                catch { output.textContent = 'Invalid JSON for board'; return; }
+            }
+
+            handleFetch(`${BASE_URL}/games/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [field]: value })
+            });
+        });
+
+        // Delete game
+        document.getElementById('deleteGame').addEventListener('click', () => {
+            const id = document.getElementById('deleteId').value;
+            if (!id) {
+                output.textContent = 'Game ID is required.';
+                return;
+            }
+
+            handleFetch(`${BASE_URL}/games/${id}`, { method: 'DELETE' });
+        });
+    </script>
+</body>
+</html>

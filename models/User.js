@@ -1,0 +1,23 @@
+﻿const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true, minlength: 3, maxlength: 30 },
+  passwordHash: { type: String, required: true },
+}, { timestamps: true });
+
+// Hash and set password
+UserSchema.methods.setPassword = async function(password) {
+  const salt = await bcrypt.genSalt(10);
+  this.passwordHash = await bcrypt.hash(password, salt);
+};
+
+// Verify password
+UserSchema.methods.verifyPassword = async function(password) {
+  return bcrypt.compare(password, this.passwordHash);
+};
+
+// Virtual ID property for convenience
+UserSchema.virtual("id").get(function() { return this._id.toString(); });
+
+module.exports = mongoose.model("User", UserSchema);
